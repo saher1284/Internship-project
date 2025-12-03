@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Price Compare — Results</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Results</h1>
+
+    <p><strong>Search query:</strong> {{ results.query }}</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Website</th>
+          <th>Price</th>
+          <th>Link</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Amazon</td>
+          <td>{{ results.amazon.price }}</td>
+          <td>{% if results.amazon.link %}<a href="{{ results.amazon.link }}" target="_blank">View</a>{% else %}—{% endif %}</td>
+        </tr>
+        <tr>
+          <td>Flipkart</td>
+          <td>{{ results.flipkart.price }}</td>
+          <td>{% if results.flipkart.link %}<a href="{{ results.flipkart.link }}" target="_blank">View</a>{% else %}—{% endif %}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p><a href="/">Search again</a></p>
+  </div>
+</body>
+</html>
