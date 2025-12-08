@@ -5,7 +5,7 @@ body
     background:#1e71c4;
     margin-right: 400px;
 
-    background-image: url('background-img.png');
+    background-image: url('/static/background-img.png');
     background-size:cover;
     color:#222}
 .container
@@ -28,7 +28,7 @@ h1{
     text-align: center;
     font-family: inherit;
     font-weight: 700;
-    /* font-size: x-large; */
+     font-size: x-large; 
     padding-bottom: 20px;
 }
 
@@ -52,3 +52,6 @@ th,td{border:1px solid #e4e6eb;padding:10px;text-align:left}
 
 
 
+ 
+
+ 

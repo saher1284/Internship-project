@@ -4,33 +4,38 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Price Compare — Results</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
   <div class="container">
     <h1>Results</h1>
 
-    <p><strong>Search query:</strong> {{ results.query }}</p>
+    <p><strong>Identified Product:</strong> {{ product }}</p>
+    <p><strong>Confidence:</strong> {{ confidence }}%</p>
+
+    <img src="{{ img_path }}" width="250" style="margin-bottom:20px;">
 
     <table>
       <thead>
         <tr>
-          <th>Website</th>
+          <th>Store</th>
           <th>Price</th>
           <th>Link</th>
         </tr>
       </thead>
       <tbody>
+
+      {% for r in results %}
         <tr>
-          <td>Amazon</td>
-          <td>{{ results.amazon.price }}</td>
-          <td>{% if results.amazon.link %}<a href="{{ results.amazon.link }}" target="_blank">View</a>{% else %}—{% endif %}</td>
+          <td>{{ r.store }}</td>
+          <!--<td>${{ r.price }}</td>-->
+          <td>${{ r.price }} (₹{{ r.price_inr }})</td>
+
+
+          <td><a href="{{ r.url }}" target="_blank">View</a></td>
         </tr>
-        <tr>
-          <td>Flipkart</td>
-          <td>{{ results.flipkart.price }}</td>
-          <td>{% if results.flipkart.link %}<a href="{{ results.flipkart.link }}" target="_blank">View</a>{% else %}—{% endif %}</td>
-        </tr>
+      {% endfor %}
+
       </tbody>
     </table>
 
