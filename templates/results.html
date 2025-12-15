@@ -11,7 +11,8 @@
     <h1>Results</h1>
 
     <p><strong>Identified Product:</strong> {{ product }}</p>
-    <p><strong>Confidence:</strong> {{ confidence }}%</p>
+    <p><strong>Confidence:</strong> {{ (confidence * 100) | round(2) }}%
+</p>
 
     <img src="{{ img_path }}" width="250" style="margin-bottom:20px;">
 

@@ -1,64 +1,77 @@
-import requests
+from serpapi import GoogleSearch
 
-# -------------------------
-# Placeholder Search APIs
-# -------------------------
+SERPAPI_KEY = "b8fde7942fb59416addb4364ad0d7e93a464cee692013278df55005dae23f6dc"
 
-import requests
-
-def usd_to_inr(usd_amount):
-    try:
-        url = "https://api.exchangerate-api.com/v4/latest/USD"
-        data = requests.get(url).json()
-        rate = data["rates"]["INR"]
-        return round(usd_amount * rate, 2)
-    except:
-        # If API fails, use fallback conversion (1 USD = ₹83)
-        return round(usd_amount * 83, 2)
-
-def search_amazon(query):
+# -----------------------------
+# Convert USD → INR
+# -----------------------------
+def usd_to_inr(usd):
     """
-    Replace with Amazon Product Advertising API.
+    Converts USD to INR.
+    Handles both strings like "$49.99" and floats like 49.99
     """
-    return {
-        "store": "Amazon",
-        "price": 49.99,
-        "url": "https://amazon.com/example"
+    if isinstance(usd, str):
+        usd = usd.replace("$", "").replace(",", "")
+    return round(float(usd) * 83, 2)  # Conversion rate: 1 USD = ₹83
+
+# -----------------------------
+# Search Google Shopping via SerpAPI
+# -----------------------------
+def search_serpapi(product):
+    params = {
+        "engine": "google_shopping",
+        "q": product,
+        "api_key": SERPAPI_KEY,
+        "gl": "In",
+        "hl": "en"
     }
+    search = GoogleSearch(params)
+    results = search.get_dict()
 
-def search_ebay(query):
-    """
-    Replace with official eBay Browse API.
-    """
-    return {
-        "store": "eBay",
-        "price": 44.75,
-        "url": "https://ebay.com/example"
-    }
+    prices = []
+    for item in results.get("shopping_results", []):
+        price = item.get("extracted_price")
+        store = item.get("source")
+        url = item.get("product_link") or item.get("link")
+        image = item.get("thumbnail")
 
-def search_walmart(query):
-    """
-    Replace with Walmart Product Search API.
-    """
-    return {
-        "store": "Walmart",
-        "price": 46.20,
-        "url": "https://walmart.com/example"
-    }
+        if price is not None:
+            prices.append({
+                "store": store,
+                "price": price,
+                "price_inr": usd_to_inr(price),
+                "url": url,
+                "image": image
+            })
 
-# -------------------------
-# Compare All Stores
-# -------------------------
+    return prices
 
-def compare_prices(product_name):
-    results = [
-        search_amazon(product_name),
-        search_ebay(product_name),
-        search_walmart(product_name)
-    ]
+# -----------------------------
+# Sort prices (lowest first)
+# -----------------------------
+def compare_prices(product):
+    results = search_serpapi(product)
+    sorted_results = sorted(
+        results, 
+        key=lambda x: float(str(x["price"]).replace("$", "").replace(",", ""))
+    )
+    # Return only the 5 cheapest results
+    return sorted_results[:5]
+
+
+# -----------------------------
+# MAIN PROGRAM
+# -----------------------------
+if __name__ == "__main__":
+    product_name = "spotlight"
+    results = compare_prices(product_name)
+
+    print(f"\nIdentified Product: {product_name}")
+    print("Top Results:\n")
 
     for r in results:
-        r["price_inr"] = usd_to_inr(r["price"])
-    
-    sorted_results = sorted(results, key=lambda x: x["price"])
-    return sorted_results
+        print(f"Store: {r['store']}")
+        print(f"Price: ${r['price']} (₹{r['price_inr']})")
+        print("Link:", r["url"])
+        print("Image:", r["image"])
+        print("-" * 60)

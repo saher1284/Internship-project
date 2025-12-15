@@ -1,32 +1,41 @@
 from flask import Flask, render_template, request
+import os
+
 from modules.image_recognition import identify_image
 from modules.price_search import compare_prices
-from modules.utils import save_uploaded_image
 
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = 'static/uploads'
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-@app.route("/")
-def home():
-    return render_template("index.html")
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    if request.method == 'POST':
+        if 'image' not in request.files:
+            return render_template('index.html', error="No file uploaded")
 
-@app.route("/search", methods=["POST"])
-def search():
-    if "image" not in request.files:
-        return "No file uploaded."
+        file = request.files['image']
+        if file.filename == '':
+            return render_template('index.html', error="No file selected")
 
-    file = request.files["image"]
-    img_path = save_uploaded_image(file)
+        # Save uploaded file
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+        file.save(filepath)
 
-    product_name, confidence = identify_image(img_path)
-    price_results = compare_prices(product_name)
+        # Identify product using your image_recognition module
+        product_name, confidence = identify_image(filepath)
 
-    return render_template(
-        "results.html",
-        product=product_name,
-        confidence=round(confidence * 100, 2),
-        results=price_results,
-        img_path=img_path
-    )
+        # Fetch price comparison results using your price_search module
+        results = compare_prices(product_name)
 
-if __name__ == "__main__":
+        # Render results page
+        return render_template('results.html',
+                               product_name=product_name,
+                               confidence=confidence,
+                               results=results,
+                               uploaded_image=filepath)
+
+    return render_template('index.html')
+
+if __name__ == '__main__':
     app.run(debug=True)
